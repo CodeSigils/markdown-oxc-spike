@@ -1,0 +1,18 @@
+{
+  "name": "markdown-oxc-spike",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "fmt": "oxfmt --write",
+    "fmt:check": "oxfmt --check fixtures/source/*.md",
+    "fmt:check:docs": "oxfmt --check README.md AGENTS.md planning.md docs/direction.md docs/findings.md",
+    "fmt:list": "oxfmt --list-different",
+    "audit": "npm audit --audit-level=moderate",
+    "check:fixture": "node scripts/check-fixture.js",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "oxfmt": "0.50.0"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "tabWidth": 2,
+  "endOfLine": "lf",
+  "insertFinalNewline": true,
+  "proseWrap": "preserve",
+  "ignorePatterns": ["node_modules/**", "fixtures/results/**"]
+}
