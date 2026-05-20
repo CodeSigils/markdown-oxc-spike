@@ -23,7 +23,7 @@ This repo is exploring a lighter Markdown formatter or guarded formatter wrapper
 
 ```bash
 # Install the pinned local toolchain
-npm install
+npm ci
 
 # Run all fixture idempotence and structural guard checks
 npm test

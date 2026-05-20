@@ -14,6 +14,20 @@ Stable framing lives in `docs/direction.md`.
 
 Research findings live in `docs/findings.md`.
 
+## External resources
+
+<https://oxc.rs/docs/guide/usage/formatter.md>
+<https://oxc.rs/docs/guide/usage/formatter/cli.md>
+<https://oxc.rs/docs/guide/usage/formatter/config-file-reference.md>
+<https://oxc.rs/docs/guide/usage/formatter/embedded-formatting.md>
+<https://oxc.rs/docs/guide/usage/formatter/unsupported-features.md>
+<https://deepwiki.com/oxc-project/oxc>
+<https://deepwiki.com/oxc-project/oxc/8-code-formatting>
+<https://deepwiki.com/oxc-project/oxc/8.1-formatter-architecture>
+<https://deepwiki.com/oxc-project/oxc/10.2-oxfmt-cli>
+<https://deepwiki.com/oxc-project/oxc/12.2-conformance-testing>
+<https://api.github.com/repos/oxc-project/oxc/contents/apps/oxfmt/conformance/fixtures/edge-cases>
+
 ## Current conclusions
 
 - Oxlint is out of scope for Markdown policy.
@@ -48,7 +62,7 @@ For each fixture:
 | `fixtures/source/fence-language-tags.md`      | pass   | Info strings preserved; tagged code content may be formatted                     |
 | `fixtures/source/safe-formatting-basics.md`   | pass   | Oxfmt left trailing spaces, heading spacing, list spacing untouched              |
 | `fixtures/source/markdown-in-js-template.md`  | pass   | Oxfmt preserved structure and formatted code inside JavaScript template literals |
-| `fixtures/source/task-lists.md`               | pass   | Oxfmt preserved task list checkboxes and formatting; idempotent                |
+| `fixtures/source/task-lists.md`               | pass   | Oxfmt preserved task list checkboxes and formatting; idempotent                  |
 
 ## Next steps
 
