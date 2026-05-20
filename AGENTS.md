@@ -13,6 +13,8 @@ Agents working in this repository MUST:
 5. Keep `planning.md` short; use it for current phase, next steps, and open questions only.
 6. Keep generated outputs out of Git.
 7. Use ripgrep for targeted code/content searches when available; do not read large files wholesale when a targeted search is enough.
+8. Preserve this repo's identity as a published spike/reference repo, not a production formatter package.
+9. Check for stale status, commands, paths, external links, CI behavior, and source-of-truth drift before reporting work complete.
 
 Agents MUST NOT:
 
@@ -22,6 +24,33 @@ Agents MUST NOT:
 - Install Oxlint unless the repo grows non-trivial JavaScript or TypeScript tooling.
 - Replace the production Markdown lint skill's table or fence validators based on Oxfmt formatting alone.
 - Trust a formatter result that fails the second-pass idempotence check.
+- Promote this repo from spike/reference status to production-ready wording without matching implementation, tests, and docs.
+- Leave local-only, unpublished, unsupported, or future-tense claims after the repo state changes.
+
+## Stale information and drift guard
+
+When changing behavior, status, commands, paths, fixture policy, external resources, CI, publication state, or conclusions, update every affected source of truth in the same change.
+
+Before reporting completion, check at least:
+
+- `README.md`
+- `AGENTS.md`
+- `planning.md`
+- `docs/direction.md`
+- `docs/findings.md`
+- `package.json`
+- `.github/workflows/ci.yml`
+- `fixtures/source/**`
+- `scripts/**`
+- `test/**`
+
+Treat drift severity as:
+
+| Level    | Meaning                                         | Agent behavior                 |
+| :------- | :---------------------------------------------- | :----------------------------- |
+| BLOCKING | stale commands, false status, or broken checks  | fix before reporting complete  |
+| WARNING  | incomplete context or unclear ownership wording | fix when touching nearby files |
+| INFO     | historical findings explicitly labeled as such  | preserve with context          |
 
 ## Required checks
 

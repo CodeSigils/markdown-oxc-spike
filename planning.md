@@ -4,7 +4,26 @@
 
 Use this repo as a small, revisitable spike for testing whether Oxfmt can help with agent-authored Markdown formatting without weakening the current Markdown lint skill's safety guarantees.
 
-This is not a GitHub repo yet. Keep the local repo clean and reviewable before publishing anywhere.
+This repo is published at `https://github.com/CodeSigils/markdown-oxc-spike`. Keep it clean, reviewable, and clearly labeled as a spike/reference repo rather than a production formatter package.
+
+## Drift guard
+
+When behavior, status, commands, paths, fixture policy, external resources, CI, or publication state changes, update every affected source of truth in the same change.
+
+Check at least:
+
+- `README.md`
+- `AGENTS.md`
+- `planning.md`
+- `docs/direction.md`
+- `docs/findings.md`
+- `package.json`
+- `.github/workflows/ci.yml`
+- `fixtures/source/**`
+- `scripts/**`
+- `test/**`
+
+Do not leave stale local-only, unpublished, unsupported, or production-ready claims in this repo.
 
 ## Current direction
 

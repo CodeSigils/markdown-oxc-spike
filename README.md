@@ -1,8 +1,10 @@
 # Markdown Oxc Spike
 
-This repo is a local research spike for testing Oxfmt behavior on Markdown.
+This repo is a published research spike for testing Oxfmt behavior on Markdown.
 
 The goal is not to replace the current Markdown lint pipeline quickly. The goal is to collect evidence about whether Oxfmt can help with lighter Markdown formatting while preserving the current skill's safety guarantees.
+
+This is reference/prior-art material, not the production formatter package. The production work lives in the formatter skill repository; this repo exists to preserve evidence, fixtures, and decision context.
 
 ## Current framing
 
@@ -12,6 +14,8 @@ This repo is exploring a lighter Markdown formatter or guarded formatter wrapper
 - Research findings: `docs/findings.md`
 - Current phase and next steps: `planning.md`
 - Agent operating rules: `AGENTS.md`
+
+When behavior, status, commands, paths, or external assumptions change, update the affected source-of-truth files in the same change. At minimum, check `README.md`, `AGENTS.md`, `planning.md`, `docs/direction.md`, `docs/findings.md`, `package.json`, CI, fixtures, and scripts for drift.
 
 ## Current assumptions
 
