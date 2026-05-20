@@ -420,3 +420,44 @@ Suggested architecture:
 Note that Oxc's conformance fixtures (like `apps/oxfmt/conformance/fixtures/edge-cases/md-in-js/`) test Oxfmt's _correctness_ when formatting Markdown embedded in JavaScript/TypeScript. Those fixtures ensure Oxfmt doesn't break when processing MDX-like syntax.
 
 Our fixtures test Oxfmt's _structural safety_ as a formatting supplement in a Markdown linting workflow. We're evaluating whether Oxfmt can be safely integrated without weakening the current lint skill's safety guarantees - requiring guardrails around fence preservation, table structure, and idempotence, even when Oxfmt itself is functioning correctly.
+
+## 2026-05-20: Official Oxfmt docs and DeepWiki resource audit
+
+Scope:
+
+- Rechecked the official Oxfmt formatter docs and formatter subdocs.
+- Rechecked DeepWiki's Oxc formatter architecture pages for source orientation.
+- Rechecked Oxc's public edge-case fixture listing, especially `md-in-js` fixtures.
+
+Sources consulted:
+
+- <https://oxc.rs/docs/guide/usage/formatter.md>
+- <https://oxc.rs/docs/guide/usage/formatter/cli.md>
+- <https://oxc.rs/docs/guide/usage/formatter/config-file-reference.md>
+- <https://oxc.rs/docs/guide/usage/formatter/embedded-formatting.md>
+- <https://oxc.rs/docs/guide/usage/formatter/unsupported-features.md>
+- <https://deepwiki.com/oxc-project/oxc>
+- <https://deepwiki.com/oxc-project/oxc/8-code-formatting>
+- <https://deepwiki.com/oxc-project/oxc/8.1-formatter-architecture>
+- <https://deepwiki.com/oxc-project/oxc/10.2-oxfmt-cli>
+- <https://deepwiki.com/oxc-project/oxc/12.2-conformance-testing>
+- <https://api.github.com/repos/oxc-project/oxc/contents/apps/oxfmt/conformance/fixtures/edge-cases>
+
+Findings:
+
+- Official Oxfmt docs explicitly list Markdown and MDX as supported formatter inputs.
+- Official CLI docs confirm `--write` is the default in-place formatting mode, `--check` is real check mode, and `--list-different` is available for changed-file reporting.
+- Oxfmt uses `.oxfmtrc.json` as the direct formatter config path; relying on a `prettier` field in `package.json` is unsupported.
+- Relevant defaults are `printWidth: 100`, `proseWrap: "preserve"`, `tabWidth: 2`, `endOfLine: "lf"`, `insertFinalNewline: true`, and `embeddedLanguageFormatting: "auto"`.
+- Unsupported or limited areas include nested `.editorconfig` files, Prettier plugins, and Prettier experimental options such as `experimentalTernaries` and `experimentalOperatorPosition`.
+- Embedded formatting can format JavaScript, TypeScript, CSS, and related code inside Markdown fences; this is useful, but increases blast radius for a conservative Markdown workflow.
+- DeepWiki is useful for architecture and source-file orientation, but official Oxfmt docs should be treated as the source of truth when current behavior or conformance claims conflict.
+- Oxc edge-case fixtures include `apps/oxfmt/conformance/fixtures/edge-cases/md-in-js/backtick-multibyte.js` and `nested-codeblock-in-list.js`, which are directly relevant to escaped backticks, multibyte content, and nested fenced-code-in-list behavior.
+
+Implications:
+
+- Keep treating Oxfmt as a black-box formatter candidate guarded by idempotence and structural checks.
+- Production wrappers should call real `oxfmt --check` for check mode rather than approximating check behavior.
+- First-stage wrappers should resolve pinned local `node_modules/.bin/oxfmt`, then `PATH`, and fail with install instructions rather than auto-downloading binaries.
+- Structural guards remain mandatory around fence counts, fence delimiter style, fenced-code content drift, table column counts, and table pipe handling.
+- `embeddedLanguageFormatting: "auto"` should be an explicit product choice, not an accidental default; use `"off"` if the intended workflow is Markdown-container formatting without code-fence content formatting.
