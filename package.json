@@ -13,7 +13,7 @@
     "test": "node --test"
   },
   "devDependencies": {
-    "oxfmt": "0.50.0"
+    "oxfmt": "0.54.0"
   },
   "engines": {
     "node": ">=20.19.0"

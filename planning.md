@@ -85,9 +85,8 @@ For each fixture:
 
 ## Next steps
 
-1. Structural guardrails for fence preservation and table structure have been implemented in check-fixture.js wrapper.
-2. Benchmark Oxfmt with guards against the current Markdown lint skill pipeline for performance and safety comparison.
-3. Document the validated architecture in project documentation.
+1. Benchmark Oxfmt with guards against the current Markdown lint skill pipeline for performance and safety comparison.
+2. Detail the validated architecture in project documentation — `docs/direction.md` has a summary but lacks integration workflow specifics and failure-mode handling.
 
 ## Open questions
 
