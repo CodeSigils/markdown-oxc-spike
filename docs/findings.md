@@ -461,3 +461,90 @@ Implications:
 - First-stage wrappers should resolve pinned local `node_modules/.bin/oxfmt`, then `PATH`, and fail with install instructions rather than auto-downloading binaries.
 - Structural guards remain mandatory around fence counts, fence delimiter style, fenced-code content drift, table column counts, and table pipe handling.
 - `embeddedLanguageFormatting: "auto"` should be an explicit product choice, not an accidental default; use `"off"` if the intended workflow is Markdown-container formatting without code-fence content formatting.
+
+## 2026-06-12: Pinned Oxfmt version bump 0.50.0 -> 0.54.0
+
+Scope:
+
+- Updated `package.json` devDependencies pin from `"oxfmt": "0.50.0"` to `"oxfmt": "0.54.0"`.
+- Ran `npm install` to regenerate `package-lock.json`.
+- Ran full test suite, formatting checks, and audit.
+
+Commands run:
+
+```bash
+npm view oxfmt version          # confirmed latest = 0.54.0
+npm install                     # updated lockfile
+node_modules/.bin/oxfmt --version  # confirmed 0.54.0
+npm test                        # 9/9 pass
+npm run fmt:check               # all fixtures correct
+npm run fmt:check:docs           # all docs correct
+npm run audit                   # 0 vulnerabilities
+```
+
+Results:
+
+| Check                                        | Result                                                |
+| :------------------------------------------- | :---------------------------------------------------- |
+| Test suite (9 fixtures)                      | All pass — idempotence and structural guards hold     |
+| Fixture formatting (`fmt:check`)             | All 9 source files correctly formatted — zero changes |
+| Doc formatting (`fmt:check:docs`)            | All 5 doc files correctly formatted                   |
+| Dependency audit                             | 0 vulnerabilities                                     |
+| First-pass output diff (source vs formatted) | **Zero diffs on all 9 fixtures**                      |
+
+Important observation:
+
+- Oxfmt 0.54.0 produces **byte-identical output** to 0.50.0 on all 9 fixture types (HTML comments after lists, escaped-pipe tables, semantic-alignment tables, blank fences, nested fences, fence language tags, safe formatting basics, Markdown-in-JS templates, task lists).
+- No regression in fence preservation, table structure, or idempotence behavior was detected.
+- The version bump is transparent for this spike's fixture suite. No guardrail changes or behavioral adjustments needed.
+- Historical findings recorded against 0.50.0 remain valid for 0.54.0.
+- The `package-lock.json` was regenerated as part of the update.
+
+## 2026-06-12: Cross-config test — production skill config against spike fixtures
+
+Tested all 9 spike fixtures with the production `markdown-formatter` skill's `.oxfmtrc.json` config to measure whether spike findings generalize to the production runtime.
+
+### Production config tested
+
+| Key                          | Spike test value   | Production value |
+| :--------------------------- | :----------------- | :--------------- |
+| `proseWrap`                  | `"preserve"`       | `"always"`       |
+| `printWidth`                 | 100                | 120              |
+| `embeddedLanguageFormatting` | `"auto"` (default) | `"off"`          |
+| `tabWidth`                   | 2                  | 2                |
+
+### Idempotence
+
+**All 9 fixtures remain idempotent** under the production config. No double-pass drift detected.
+
+### Behavioral changes (formatted output vs source)
+
+| Fixture                       | Diff vs source                                                                                                                            |
+| :---------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
+| `fence-blank.md`              | Zero diff                                                                                                                                 |
+| `fence-language-tags.md`      | Zero diff                                                                                                                                 |
+| `fence-nested.md`             | Zero diff                                                                                                                                 |
+| `html-comment-after-list.md`  | Zero diff                                                                                                                                 |
+| `markdown-in-js-template.md`  | Zero diff                                                                                                                                 |
+| `safe-formatting-basics.md`   | **One change**: list continuation paragraph without blank-line separator collapsed onto the list item line (`proseWrap: "always"` reflow) |
+| `table-escaped-pipes.md`      | Zero diff                                                                                                                                 |
+| `table-semantic-alignment.md` | Zero diff                                                                                                                                 |
+| `task-lists.md`               | Zero diff                                                                                                                                 |
+
+### Structural guard validation
+
+All three production guard scripts pass cleanly on the production-formatted output:
+
+| Guard script                  | File           | Result                |
+| :---------------------------- | :------------- | :-------------------- |
+| `check-structure.js --verify` | All 9 fixtures | All valid             |
+| `check-tables.js`             | All 9 fixtures | Exit 0, no violations |
+| `check-fences.js`             | All 9 fixtures | Exit 0, no violations |
+
+### Implications
+
+- **`embeddedLanguageFormatting: "off"` works as expected.** Code-fence content is left unformatted, including tagged fences where `"auto"` mode previously reformatted code.
+- **`proseWrap: "always"` changes only one fixture** (safe-formatting-basics.md), and the change is a single list-continuation reflow — structurally valid and idempotent.
+- **No structural guards needed beyond what the production skill already implements.** The spike's 9 fixtures are a valid reference set for production verification.
+- **Fence and table safety is preserved** across both configs. The production config does not introduce structural drift that the guard scripts miss.
+- The spike's `safe-formatting-basics.md` fixture finding — "Oxfmt with `proseWrap: preserve` left trailing spaces, heading spacing, list spacing untouched" — does NOT generalize to the production config. With `proseWrap: "always"`, Oxfmt will reflow adjacent paragraph content, including list continuations without blank-line separators. A production codebase relying on this fixture's result should re-test with the actual target config.
