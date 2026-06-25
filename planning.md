@@ -107,6 +107,28 @@ For each fixture:
 
 ## Open questions
 
-- Is Oxfmt too broad for a lightweight Markdown formatter?
+- ~~Is Oxfmt too broad for a lightweight Markdown formatter?~~ **Closed (2026-06-25).** Yes — based on evidence collected across 9 fixture types, 3 Oxfmt versions, and cross-config testing against production guard scripts.
+
+  **What a lightweight Markdown formatter needs vs what exists:**
+
+  | Operation                            | markdownlint-cli2 --fix | Oxfmt (proseWrap: preserve, embedded: off) |
+  | :----------------------------------- | :---------------------- | :----------------------------------------- |
+  | Trailing whitespace removal          | ✅                      | ✅                                         |
+  | Final newline                        | ✅                      | ✅                                         |
+  | Heading spacing                      | ✅                      | ❌                                         |
+  | List spacing                         | ✅                      | ❌                                         |
+  | List marker consistency              | ✅                      | ❌                                         |
+  | Table column alignment               | ❌                      | ✅                                         |
+  | Fence normalization (tilde→backtick) | ❌                      | ✅                                         |
+  | Consistent indentation               | ❌                      | ✅                                         |
+  | Code formatting inside fences        | ❌                      | gated via config                           |
+  | Prose reflow                         | ❌                      | gated via config                           |
+
+  **The gap Oxfmt fills is small:** table column alignment, fence normalization, and indentation normalization — each achievable in ~10 lines of regex transforms. The remaining operations it provides are either already covered by `markdownlint-cli2 --fix` or gated behind config options the lightweight profile disables.
+
+  **The dependency cost is disproportionate:** Oxfmt pulls in the full Prettier Markdown/MDX/AST pipeline as a platform-specific binary (~10MB per platform). It has 12 Prettier config options (only 4 relevant to Markdown), and binary behavior can change across minor versions — requiring the bump script and structural guard scripts to detect regressions.
+
+  **Verdict:** Oxfmt is the wrong shape for a lightweight Markdown formatter in agent workflows. The delta it provides over existing tooling is narrow enough that a purpose-built micro-formatter (zero dependencies, ~30 lines of transforms) would be simpler, safer, and never surprise the user. The spike's value was proving this conclusion with evidence rather than assumptions.
+
 - ~~Should this repo grow a tiny custom safe formatter for comparison?~~ **Not useful (2026-06-25).** The safe formatting operations (trailing space, final newline, heading/list spacing) are already covered by `markdownlint-cli2 --fix`. The hard problems are structural (fence/table safety), which need validators, not formatters. A custom formatter would duplicate existing tooling; the spike is best kept as an Oxfmt test harness.
 - Should generated first-pass outputs become committed snapshots later, or stay ignored until the harness stabilizes?
