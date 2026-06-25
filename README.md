@@ -36,7 +36,7 @@ npm test
 npm run check:fixture -- fixtures/source/html-comment-after-list.md
 
 # Check Markdown formatting with pinned local Oxfmt
-npm run fmt:check -- README.md AGENTS.md planning.md docs/direction.md docs/findings.md fixtures/source/*.md
+npm run fmt:check:docs
 
 # Check dependency audit status
 npm run audit

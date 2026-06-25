@@ -1,6 +1,7 @@
 node_modules/
 fixtures/work/
 fixtures/results/
+fixtures/.oxfmtrc-prod.json
 .open-mem/
 .omo/
 

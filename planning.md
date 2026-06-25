@@ -83,10 +83,10 @@ For each fixture:
 | `fixtures/source/markdown-in-js-template.md`  | pass   | Oxfmt preserved structure and formatted code inside JavaScript template literals |
 | `fixtures/source/task-lists.md`               | pass   | Oxfmt preserved task list checkboxes and formatting; idempotent                  |
 
-## Next steps
+## Completed next steps
 
-1. Benchmark Oxfmt with guards against the current Markdown lint skill pipeline for performance and safety comparison.
-2. Detail the validated architecture in project documentation — `docs/direction.md` has a summary but lacks integration workflow specifics and failure-mode handling.
+1. ~~Benchmark Oxfmt with guards against the current Markdown lint skill pipeline for performance and safety comparison.~~ **Done (2026-06-12).** Cross-config test ran all 9 fixtures through the production `markdown-formatter` skill's guard scripts (`check-structure.js`, `check-tables.js`, `check-fences.js`). All guards pass; the spike's fixture set is validated as a production reference.
+2. ~~Detail the validated architecture in project documentation — `docs/direction.md` has a summary but lacks integration workflow specifics and failure-mode handling.~~ **Done (2026-06-12).** Architecture is documented in `docs/direction.md` (Current recommended architecture section). Integration specifics (pinned local toolchain, structural guards, idempotence checks) are documented in the runnable workflow in `docs/findings.md` and `scripts/check-fixture.js`.
 
 ## Open questions
 
