@@ -27,6 +27,9 @@ function runOxfmt(args) {
 }
 
 function extractFenceInfo(content) {
+  // NOTE: \n anchors assume UNIX line endings (LF). If CRLF (\r\n) input is
+  // expected, update the delimiter group to (\r?\n) in all four positions:
+  // fence open, fence content tail, close-fence, and trailing break.
   const fenceRegex = /^( {0,3})(`{3,}|~{3,})([^\n]*)\n([\s\S]*?)\n\1\2\n/gmu;
   const fences = [];
   let match;

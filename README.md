@@ -68,3 +68,8 @@ Adopt Oxfmt only if tests show it improves the workflow without weakening these 
 - blank and nested fenced code blocks remain valid
 - repeated formatter runs are idempotent
 - formatter behavior is observable without Markdown lint auto-fixes masking the result
+
+All 9 spike fixtures pass the production `markdown-formatter` skill's structural
+guard scripts (`check-structure.js`, `check-tables.js`, `check-fences.js`) across
+both `proseWrap: preserve` and `proseWrap: always` configs. See `docs/findings.md`
+(2026-06-12 entry) for the cross-config results.
