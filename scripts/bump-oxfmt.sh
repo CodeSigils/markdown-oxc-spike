@@ -88,7 +88,7 @@ else
   # Check npm registry has this version
   AVAILABLE="$(npm view oxfmt versions --json 2>/dev/null \
     | tr -d '[],"' \
-    | tr ' ' '\n' \
+    | tr ' ' '\012' \
     | grep -c "^${TARGET}$" || true)"
   if [ "$AVAILABLE" -eq 0 ]; then
     fail "oxfmt version ${TARGET} not found in npm registry"
