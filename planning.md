@@ -108,5 +108,5 @@ For each fixture:
 ## Open questions
 
 - Is Oxfmt too broad for a lightweight Markdown formatter?
-- Should this repo grow a tiny custom safe formatter for comparison?
+- ~~Should this repo grow a tiny custom safe formatter for comparison?~~ **Not useful (2026-06-25).** The safe formatting operations (trailing space, final newline, heading/list spacing) are already covered by `markdownlint-cli2 --fix`. The hard problems are structural (fence/table safety), which need validators, not formatters. A custom formatter would duplicate existing tooling; the spike is best kept as an Oxfmt test harness.
 - Should generated first-pass outputs become committed snapshots later, or stay ignored until the harness stabilizes?
