@@ -9,6 +9,7 @@ const fixtures = [
   "fixtures/source/html-comment-after-list.md",
   "fixtures/source/table-escaped-pipes.md",
   "fixtures/source/table-semantic-alignment.md",
+  "fixtures/source/double-pipe-table.md",
   "fixtures/source/fence-blank.md",
   "fixtures/source/fence-nested.md",
   "fixtures/source/fence-language-tags.md",

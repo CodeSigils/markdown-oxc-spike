@@ -453,9 +453,50 @@ function renderMismatch(before, after) {
   ].join("\n");
 }
 
-// ---------------------------------------------------------------------------
-// Main
-// ---------------------------------------------------------------------------
+/**
+ * Detect adjacent pipes (double-pipe artifacts) in table rows.
+ * Returns an array of { lineIndex, line, detail } for each occurrence.
+ */
+function detectDoublePipes(content) {
+  const lines = content.split("\n");
+  const issues = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.includes("||")) {
+      // Must look like a table row (leading pipe after optional whitespace)
+      if (!line.trim().startsWith("|")) continue;
+
+      // Must have at least 2 pipe chars total to be a table row
+      const pipeCount = (line.match(/\|/g) || []).length;
+      if (pipeCount < 2) continue;
+
+      // Check for escaped pipes that happen to be adjacent
+      const plainLine = line.replace(/\\\|/g, ""); // strip escaped pipes
+      const adjPos = plainLine.indexOf("||");
+      if (adjPos === -1) continue;
+
+      // Check if the adjacent pipes are inside inline code
+      // Simple heuristic: if `||` is inside backticks, skip
+      const before = plainLine.slice(0, adjPos);
+      const backtickCount = (before.match(/`/g) || []).length;
+      if (backtickCount % 2 === 1) continue; // inside inline code
+
+      issues.push({
+        lineIndex: i,
+        line,
+        detail: adjPos === 0
+          ? "Leading double pipe (phantom empty first column)"
+          : adjPos >= line.length - 2
+            ? "Trailing double pipe (phantom empty last column)"
+            : "Adjacent double pipe (possible empty cell or merge artifact)",
+      });
+    }
+  }
+
+  return issues;
+}
+
 async function main() {
   const source = process.argv[2];
 
@@ -472,10 +513,23 @@ async function main() {
 
   await mkdir(dirname(workFile), { recursive: true });
   await mkdir(dirname(firstPassFile), { recursive: true });
+
+  const sourceContent = await readFile(source, "utf8");
+
+  // Pre-check: detect double-pipe artifacts in table rows
+  const doublePipeIssues = detectDoublePipes(sourceContent);
+  if (doublePipeIssues.length > 0) {
+    console.log(`\n  Double-pipe issues (${doublePipeIssues.length}):`);
+    for (const issue of doublePipeIssues) {
+      console.log(`    Line ${issue.lineIndex + 1}: ${issue.detail}`);
+      console.log(`      ${issue.line}`);
+    }
+    // Not failing — this is diagnostic info for the fixture report
+  }
+
   await copyFile(source, workFile);
 
   // Pre-check: extract structural information
-  const sourceContent = await readFile(source, "utf8");
   const sourceFences = extractFenceInfo(sourceContent);
   const sourceTables = extractTableInfo(sourceContent);
 
