@@ -25,6 +25,23 @@ Check at least:
 
 Do not leave stale local-only, unpublished, unsupported, or production-ready claims in this repo.
 
+## Stale factual claims
+
+When revisiting this repo months later, these claims in `planning.md` may be stale
+and need verification before acting on them:
+
+| Claim                                        | Where                              | Risk                                                     | How to verify                                                 |
+| :------------------------------------------- | :--------------------------------- | :------------------------------------------------------- | :------------------------------------------------------------ |
+| Fixture behavior (9 fixtures pass)           | Completed fixture coverage table   | Oxfmt version drift may change behavior                  | `bash scripts/bump-oxfmt.sh latest`                           |
+| Production guard scripts pass (cross-config) | Completed next steps, item 1       | Production `markdown-formatter` guard scripts may change | Re-run cross-config test with current production repo         |
+| External resource URLs                       | External resources section         | oxc.rs docs restructured; DeepWiki URLs stale            | Curl each URL, check 200                                      |
+| `package.json` version pin                   | (external, referenced by workflow) | If pin doesn't match installed binary, bump script fails | `bash scripts/bump-oxfmt.sh <current pin>`                    |
+| Open questions                               | Open questions section             | May have been answered or superseded                     | Search oxc changelog and production repo for relevant changes |
+
+Note: the `Current workflow` section says the harness "now includes structural
+guards" — that's a time-relative description. The structural guards are present;
+drop the "now" when editing nearby.
+
 ## Current direction
 
 The repo is exploring a lighter Markdown formatter or guarded Oxfmt wrapper, not a new Markdown linter.
@@ -66,7 +83,7 @@ For each fixture:
 2. Add the fixture to `test/check-fixture.test.js`.
 3. Run `npm test` and watch the fixture fail before the source file exists.
 4. Add the source fixture.
-5. Run the fixture harness (which now includes structural guards).
+5. Run the fixture harness (which includes structural guards).
 6. Record stable findings in `docs/findings.md`.
 
 ## Completed fixture coverage
