@@ -533,13 +533,14 @@ Tested all 9 spike fixtures with the production `markdown-formatter` skill's `.o
 
 ### Structural guard validation
 
-All three production guard scripts pass cleanly on the production-formatted output:
+All four production guard scripts pass cleanly on the production-formatted output:
 
 | Guard script                  | File           | Result                |
 | :---------------------------- | :------------- | :-------------------- |
 | `check-structure.js --verify` | All 9 fixtures | All valid             |
 | `check-tables.js`             | All 9 fixtures | Exit 0, no violations |
 | `check-fences.js`             | All 9 fixtures | Exit 0, no violations |
+| `check-pipes.js`              | All 9 fixtures | Exit 0, no violations |
 
 ### Implications
 
@@ -548,3 +549,21 @@ All three production guard scripts pass cleanly on the production-formatted outp
 - **No structural guards needed beyond what the production skill already implements.** The spike's 9 fixtures are a valid reference set for production verification.
 - **Fence and table safety is preserved** across both configs. The production config does not introduce structural drift that the guard scripts miss.
 - The spike's `safe-formatting-basics.md` fixture finding — "Oxfmt with `proseWrap: preserve` left trailing spaces, heading spacing, list spacing untouched" — does NOT generalize to the production config. With `proseWrap: "always"`, Oxfmt will reflow adjacent paragraph content, including list continuations without blank-line separators. A production codebase relying on this fixture's result should re-test with the actual target config.
+
+## 2026-06-27: Production wrapper default-path double-pipe gap
+
+Observed against `agents-markdown-formatter` v1.0.4 while investigating a real `hermes-skill-hq/index/INDEX.md` table corruption.
+
+### Finding
+
+- `check-pipes.js` correctly detected adjacent table pipes when run directly, through `--validate`, through `--verify`, or through `--check --guard`.
+- Plain `--check`, plain `--dry-run`, and plain/default `--fix` reached `oxfmt` without first running `check-pipes.js`.
+- Plain/default `--fix` could rewrite a malformed `|| ... ||` table into a worse paragraph/table hybrid instead of refusing the unsafe input.
+
+### Interpretation
+
+This was not an Oxfmt discovery failure: the production wrapper already had a correct adjacent-pipe detector. The failure was CLI wiring. A guard script only protects users on paths that actually invoke it.
+
+### Resolution
+
+Production `agents-markdown-formatter` v1.0.5 runs `check-pipes.js` as a preflight for `--check`, `--fix`, `--dry-run`, and `--guard` before invoking `oxfmt`. Integration regressions now assert that these default paths fail double-pipe tables without modifying the file or reporting a safe format preview.
