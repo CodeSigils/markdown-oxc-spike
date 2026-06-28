@@ -3,11 +3,11 @@
 Problems we still encounter when working with Markdown that no single tool fully solves.
 Covers formatting, structural, and tooling gaps.
 
-## 1. Double-pipe `||` artifacts in tables
+## 1. Distinguishing intentional from spurious empty cells in tables
 
-**What happens:** A table row acquires an extra leading or internal pipe, producing `||`.
-The extra pipe is syntactically valid Markdown (it creates an empty cell), so neither
-markdownlint nor Oxfmt flags it. The table renders with a spurious empty column.
+**What happens:** A table row acquires `||` (adjacent pipes), which per GFM §4.10
+creates a valid empty cell. But it can be hard to tell whether the empty cell was
+intentional or introduced by a merge conflict, find-and-replace, or patch tool.
 
 **How we hit it:**
 
@@ -16,13 +16,16 @@ markdownlint nor Oxfmt flags it. The table renders with a spurious empty column.
 - Column deletion leaves a trailing/leading `||`
 - Patch tools (sed, patch, find-and-replace) matched to line rather than to cell
 
-**Detection:** markdownlint does not flag `||` as a violation. Oxfmt pads columns
-around it but does not collapse `||` into `|`. The `check-tables.js` guard script
-validates column counts but does not inspect for empty leading/trailing cells.
+**Detection:** markdownlint does not flag `||` — and correctly so, since it's valid
+GFM. Oxfmt pads columns around `||` but does not collapse it. The GFM table
+validation in `check-fixture.js` checks header/delimiter column count match (GFM
+Example 203) and reports data row cell count variances (GFM Example 204), but
+cannot distinguish intentional from spurious empty cells.
 
-**What would help:** A lint rule that warns on zero-width column content produced by
-adjacent pipes, or a normalization step that collapses `||` → `|` when the empty
-cell is at a row boundary.
+**What would help:** No tool can reliably distinguish intentional `||` from
+spurious `||` without human judgment. The safest mitigation is to catch spurious
+introductions at the merge/patch stage (diff review) rather than in the formatter
+or linter.
 
 ---
 

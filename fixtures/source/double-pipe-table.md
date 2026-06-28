@@ -1,27 +1,30 @@
-# Double-Pipe Table (adjacent pipes)
+# GFM Table Empty Cells (double-pipe patterns)
 
-## Leading double pipe (phantom empty first column)
+Per GFM §4.10, consecutive pipes create empty cells and are valid syntax.
+These tables test that Oxfmt preserves this structure correctly.
+
+## Leading double pipe (empty first cell)
 
 || Name | Age |
 || ----- | --- |
 || Alice | 30 |
 || Bob | 25 |
 
-## Internal double pipe (adjacent pipes between cells)
+## Internal adjacent pipes (empty cell between columns)
 
 | Name || Age | City |
 | ----- ||--- | ------- |
 | Carol || 28 | NYC |
 | Dave || 35 | Chicago |
 
-## Trailing double pipe (phantom trailing column)
+## Trailing double pipe (empty trailing cell)
 
 | Name | Age ||
 | ----- | --- ||
 | Erin | 22 ||
 | Frank | 40 ||
 
-## Valid table (no double pipes — should pass)
+## Valid table (no empty cells — should pass)
 
 | Name  | Age | City    |
 | :---- | :-: | :------ |

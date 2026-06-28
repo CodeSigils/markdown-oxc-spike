@@ -454,10 +454,190 @@ function renderMismatch(before, after) {
 }
 
 /**
- * Detect adjacent pipes (double-pipe artifacts) in table rows.
- * Returns an array of { lineIndex, line, detail } for each occurrence.
+ * Parse table rows into cells per GFM spec.
+ *
+ * GFM table rules (https://github.github.com/gfm/#tables-extension-):
+ * - Cells separated by pipes (|). Leading/trailing pipe recommended.
+ * - Spaces between pipes and cell content are trimmed.
+ * - Include a pipe in a cell by escaping it: \|
+ * - Header row and delimiter row MUST have same number of cells.
+ *   If not, it's NOT a table (Example 203).
+ * - Data rows may have fewer cells (empty cells inserted) or more
+ *   cells (excess ignored) (Example 204).
+ *
+ * Returns null if the line isn't a table row. Otherwise returns
+ * an array of cell strings (trimmed, with escaped pipes unescaped).
  */
-function detectDoublePipes(content) {
+function gfmSplitRow(line) {
+  const trimmed = line.trim();
+  if (!trimmed.startsWith("|")) return null;
+
+  // Strip leading and trailing pipes
+  let inner = trimmed;
+  if (inner.startsWith("|")) inner = inner.slice(1);
+  if (inner.endsWith("|")) inner = inner.slice(0, -1);
+
+  // Parse cells, handling escaped pipes and inline code
+  const cells = [];
+  let current = "";
+  let escaped = false;
+  let inCode = false;
+
+  for (let i = 0; i < inner.length; i++) {
+    const ch = inner[i];
+    const next = i + 1 < inner.length ? inner[i + 1] : null;
+
+    if (escaped) {
+      current += ch;
+      escaped = false;
+      continue;
+    }
+
+    if (ch === "\\") {
+      current += ch;
+      escaped = true;
+      continue;
+    }
+
+    if (ch === "`" && !inCode) {
+      inCode = true;
+      current += ch;
+      continue;
+    }
+
+    if (ch === "`" && inCode) {
+      inCode = false;
+      current += ch;
+      continue;
+    }
+
+    if (ch === "|" && !inCode) {
+      cells.push(current.trim());
+      current = "";
+      continue;
+    }
+
+    current += ch;
+  }
+
+  // Push the last cell
+  cells.push(current.trim());
+
+  return cells;
+}
+
+/**
+ * Check if a table row is a delimiter row (contains only hyphens, colons, pipes, spaces).
+ */
+function gfmIsDelimiterRow(cells) {
+  return cells.every((cell) => /^:?-+:?$/.test(cell.trim()));
+}
+
+/**
+ * Parse and validate GFM table structure for all table blocks in content.
+ *
+ * Returns an array of issues:
+ *   { type: "not-a-table" | "cell-count-variance", detail, lineIndex, headerCount, rowCount }
+ *
+ * - "not-a-table": header/delimiter cell count mismatch (Example 203)
+ * - "cell-count-variance": data row has more/fewer cells than header (Example 204)
+ */
+function validateGfmTableStructure(content) {
+  const lines = content.split("\n");
+  const issues = [];
+
+  // Find table blocks: consecutive lines that look like table rows
+  let tableStart = -1;
+  let tableRows = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const cells = gfmSplitRow(lines[i]);
+
+    if (cells !== null && !/^:?-+:?$/.test(lines[i].trim())) {
+      // This line could be part of a table
+      // Include delimiter rows too
+      tableRows.push({ lineIndex: i, cells, raw: lines[i] });
+      if (tableStart === -1) tableStart = i;
+    } else if (cells !== null && gfmIsDelimiterRow(cells)) {
+      // Delimiter row
+      tableRows.push({ lineIndex: i, cells, raw: lines[i] });
+      if (tableStart === -1) tableStart = i;
+    } else {
+      // Non-table line ends any potential table block
+      if (tableRows.length >= 2) {
+        // We have a potential table — validate it
+        const result = validateGfmBlock(tableRows);
+        issues.push(...result);
+      }
+      // Reset
+      tableStart = -1;
+      tableRows = [];
+    }
+  }
+
+  // Handle EOF case
+  if (tableRows.length >= 2) {
+    const result = validateGfmBlock(tableRows);
+    issues.push(...result);
+  }
+
+  return issues;
+}
+
+/**
+ * Validate a single GFM table block.
+ * Returns an array of issues found within this block.
+ */
+function validateGfmBlock(rows) {
+  const issues = [];
+
+  // Find header row and delimiter row
+  const headerRow = rows[0];
+  const delimiterRow = rows[1];
+
+  if (!gfmIsDelimiterRow(delimiterRow.cells)) {
+    // First row might be a delimiter itself (e.g., no header table)
+    // Or second row isn't a delimiter — not a valid table
+    return issues;
+  }
+
+  const headerCount = headerRow.cells.length;
+  const delimiterCount = delimiterRow.cells.length;
+
+  // GFM Example 203: header and delimiter MUST have same cell count
+  // If not, it's NOT a table
+  if (headerCount !== delimiterCount) {
+    issues.push({
+      type: "not-a-table",
+      detail: `Header (${headerCount} cells) and delimiter (${delimiterCount} cells) column count mismatch — not recognized as a table per GFM Example 203`,
+      lineIndex: headerRow.lineIndex,
+      headerCount,
+      delimiterCount,
+    });
+    return issues; // No point checking further
+  }
+
+  // Check data rows
+  for (let i = 2; i < rows.length; i++) {
+    const row = rows[i];
+    const dataCount = row.cells.length;
+
+    if (dataCount !== headerCount) {
+      issues.push({
+        type: "cell-count-variance",
+        detail: `Data row ${i - 1} has ${dataCount} cells vs ${headerCount} header cells — per GFM Example 204: ${
+          dataCount < headerCount ? "fewer cells → empty cells inserted" : "more cells → excess ignored"
+        }`,
+        lineIndex: row.lineIndex,
+        headerCount,
+        rowCount: dataCount,
+      });
+    }
+  }
+
+  return issues;
+}
+function detectEmptyCells(content) {
   const lines = content.split("\n");
   const issues = [];
 
@@ -486,10 +666,10 @@ function detectDoublePipes(content) {
         lineIndex: i,
         line,
         detail: adjPos === 0
-          ? "Leading double pipe (phantom empty first column)"
-          : adjPos >= line.length - 2
-            ? "Trailing double pipe (phantom empty last column)"
-            : "Adjacent double pipe (possible empty cell or merge artifact)",
+          ? "Leading double pipe (creates empty first cell — valid GFM)"
+          : adjPos >= plainLine.length - 2
+            ? "Trailing double pipe (creates empty trailing cell — valid GFM)"
+            : "Adjacent double pipe (creates empty cell between columns — valid GFM)",
       });
     }
   }
@@ -516,15 +696,23 @@ async function main() {
 
   const sourceContent = await readFile(source, "utf8");
 
-  // Pre-check: detect double-pipe artifacts in table rows
-  const doublePipeIssues = detectDoublePipes(sourceContent);
+  // Pre-check: detect empty-table-cell patterns (valid GFM syntax — diagnostic only)
+  const doublePipeIssues = detectEmptyCells(sourceContent);
   if (doublePipeIssues.length > 0) {
-    console.log(`\n  Double-pipe issues (${doublePipeIssues.length}):`);
+    console.log(`\n  Empty cell patterns (${doublePipeIssues.length}):`);
     for (const issue of doublePipeIssues) {
       console.log(`    Line ${issue.lineIndex + 1}: ${issue.detail}`);
       console.log(`      ${issue.line}`);
     }
-    // Not failing — this is diagnostic info for the fixture report
+  }
+
+  // Pre-check: GFM table structure validation
+  const gfmIssues = validateGfmTableStructure(sourceContent);
+  if (gfmIssues.length > 0) {
+    console.log(`\n  GFM table structure notes (${gfmIssues.length}):`);
+    for (const issue of gfmIssues) {
+      console.log(`    ${issue.detail}`);
+    }
   }
 
   await copyFile(source, workFile);

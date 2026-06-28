@@ -567,3 +567,47 @@ This was not an Oxfmt discovery failure: the production wrapper already had a co
 ### Resolution
 
 Production `agents-markdown-formatter` v1.0.5 runs `check-pipes.js` as a preflight for `--check`, `--fix`, `--dry-run`, and `--guard` before invoking `oxfmt`. Integration regressions now assert that these default paths fail double-pipe tables without modifying the file or reporting a safe format preview.
+
+---
+
+## 2026-06-28: GFM-compliant table validation
+
+Source: `https://github.github.com/gfm/#tables-extension-`
+
+**Summary:** Added GFM §4.10-compliant table validation to `check-fixture.js`. Previous
+validation treated `||` (consecutive pipes) as a "phantom" artifact, but per the GFM
+spec, consecutive pipes create valid empty cells:
+
+> "Cells... separated by pipes (|). A leading and trailing pipe is also recommended
+> for clarity of reading."
+>
+> "If there are a number of cells fewer than the number of cells in the header row,
+> empty cells are inserted. If there are greater, the excess is ignored."
+> — GFM Example 204
+
+**Key GFM table rules applied:**
+
+| Rule                                                  | GFM source                             | Implementation                                   |
+| ----------------------------------------------------- | -------------------------------------- | ------------------------------------------------ |
+| Header/delimiter cell count must match                | Example 203 — if mismatch, NOT a table | `validateGfmBlock()` returns `not-a-table` issue |
+| Data rows can have fewer cells (empty cells inserted) | Example 204                            | `cell-count-variance` issue (informational)      |
+| Data rows can have more cells (excess ignored)        | Example 204                            | `cell-count-variance` issue (informational)      |
+| Leading pipe recommended but not required             | §4.10 preamble                         | `gfmSplitRow()` handles both                     |
+| Escaped pipes (`\|`) inside cells                     | Example 200                            | `gfmSplitRow()` tracks escape flag               |
+| Pipes inside inline code aren't delimiters            | §4.10 (inlines parsed)                 | `gfmSplitRow()` tracks backtick state            |
+| Spaces between pipes and cell content trimmed         | §4.10 preamble                         | `cell.trim()` in `gfmSplitRow()`                 |
+
+**Changed files:**
+
+- `scripts/check-fixture.js` — added `gfmSplitRow()`, `gfmIsDelimiterRow()`,
+  `validateGfmTableStructure()`, `validateGfmBlock()`. Renamed `detectDoublePipes()`
+  to `detectEmptyCells()` with neutral diagnostic messages.
+- `fixtures/source/double-pipe-table.md` — reframed from "phantom" language to
+  neutral valid-GFM empty-cell descriptions.
+- `ACTIVE_PAIN_POINTS.md` — pain point #1 revised from "artifact" framing to
+  "intentional vs spurious" framing.
+
+**Open question:** The `validateGfmTableStructure()` output is diagnostic-only (no
+test failure). Should structural GFM violations (Example 203 mismatches) cause test
+failures? Currently the structural-change check in `compareTableInfo()` is the
+failing guard for Oxfmt breakage, not the GFM spec rule.
