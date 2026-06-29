@@ -20,6 +20,9 @@ Check at least:
 - `package.json`
 - `.github/workflows/ci.yml`
 - `fixtures/source/**`
+- `fixtures/current/**`
+- `fixtures/pipe-safety/**`
+- `fixtures/violations/**`
 - `scripts/**`
 - `test/**`
 
@@ -30,13 +33,14 @@ Do not leave stale local-only, unpublished, unsupported, or production-ready cla
 When revisiting this repo months later, these claims in `planning.md` may be stale
 and need verification before acting on them:
 
-| Claim                                        | Where                              | Risk                                                     | How to verify                                                 |
-| :------------------------------------------- | :--------------------------------- | :------------------------------------------------------- | :------------------------------------------------------------ |
-| Fixture behavior (9 fixtures pass)           | Completed fixture coverage table   | Oxfmt version drift may change behavior                  | `bash scripts/bump-oxfmt.sh latest`                           |
-| Production guard scripts pass (cross-config) | Completed next steps, item 1       | Production `markdown-formatter` guard scripts may change | Re-run cross-config test with current production repo         |
-| External resource URLs                       | External resources section         | oxc.rs docs restructured; DeepWiki URLs stale            | Curl each URL, check 200                                      |
-| `package.json` version pin                   | (external, referenced by workflow) | If pin doesn't match installed binary, bump script fails | `bash scripts/bump-oxfmt.sh <current pin>`                    |
-| Open questions                               | Open questions section             | May have been answered or superseded                     | Search oxc changelog and production repo for relevant changes |
+| Claim                                                                 | Where                              | Risk                                                     | How to verify                                                                            |
+| :-------------------------------------------------------------------- | :--------------------------------- | :------------------------------------------------------- | :--------------------------------------------------------------------------------------- |
+| Clean fixture behavior (9 source fixtures pass)                       | Completed fixture coverage table   | Oxfmt version drift may change behavior                  | `bash scripts/bump-oxfmt.sh latest`                                                      |
+| Expanded fixture taxonomy (`current/`, `pipe-safety/`, `violations/`) | Current workflow and tests         | Production fixture taxonomy may change                   | Compare against `~/projects/agents-markdown-formatter/test/fixtures/` and run `npm test` |
+| Production guard scripts pass (cross-config)                          | Completed next steps, item 1       | Production `markdown-formatter` guard scripts may change | Re-run cross-config test with current production repo                                    |
+| External resource URLs                                                | External resources section         | oxc.rs docs restructured; DeepWiki URLs stale            | Curl each URL, check 200                                                                 |
+| `package.json` version pin                                            | (external, referenced by workflow) | If pin doesn't match installed binary, bump script fails | `bash scripts/bump-oxfmt.sh <current pin>`                                               |
+| Open questions                                                        | Open questions section             | May have been answered or superseded                     | Search oxc changelog and production repo for relevant changes                            |
 
 Note: the `Current workflow` section says the harness "now includes structural
 guards" — that's a time-relative description. The structural guards are present;
@@ -77,14 +81,19 @@ Research findings live in `docs/findings.md`.
 
 ## Current workflow
 
-For each fixture:
+For each clean Oxfmt fixture:
 
-1. Add a source fixture under `fixtures/source/`.
-2. Add the fixture to `test/check-fixture.test.js`.
-3. Run `npm test` and watch the fixture fail before the source file exists.
-4. Add the source fixture.
-5. Run the fixture harness (which includes structural guards).
-6. Record stable findings in `docs/findings.md`.
+1. Add a direct-Oxfmt-clean fixture under `fixtures/source/`.
+2. Let `test/check-fixture.test.js` discover it automatically.
+3. Run the fixture harness, `npm test`, and `npm run fmt:check`.
+4. Record stable findings in `docs/findings.md`.
+
+For formatter-safety coverage copied from production:
+
+1. Put broad clean regression fixtures under `fixtures/current/`.
+2. Put valid GFM that must be repaired or skipped before Oxfmt under `fixtures/pipe-safety/`.
+3. Put expected structural failures under `fixtures/violations/`.
+4. Run `npm test`; do not include `pipe-safety/` or `violations/` in raw `fmt:check`.
 
 ## Completed fixture coverage
 
@@ -99,6 +108,14 @@ For each fixture:
 | `fixtures/source/safe-formatting-basics.md`   | pass   | Oxfmt left trailing spaces, heading spacing, list spacing untouched              |
 | `fixtures/source/markdown-in-js-template.md`  | pass   | Oxfmt preserved structure and formatted code inside JavaScript template literals |
 | `fixtures/source/task-lists.md`               | pass   | Oxfmt preserved task list checkboxes and formatting; idempotent                  |
+
+## Expanded formatter-safety coverage
+
+| Fixture class           | Files | Expected behavior                                                        |
+| :---------------------- | :---- | :----------------------------------------------------------------------- |
+| `fixtures/current/`     | 3     | Clean broad regression fixtures; guarded idempotence and validation pass |
+| `fixtures/pipe-safety/` | 1     | Valid GFM adjacent-pipe table repairs, then skips unsafe Oxfmt pass      |
+| `fixtures/violations/`  | 4     | Deliberately invalid fixtures fail structural validation                 |
 
 ## Completed next steps
 

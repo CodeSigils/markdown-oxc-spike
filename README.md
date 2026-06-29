@@ -44,20 +44,23 @@ npm run audit
 
 ## Files
 
-| File or directory   | Purpose                                         |
-| :------------------ | :---------------------------------------------- |
-| `README.md`         | Orientation and quick-start notes               |
-| `AGENTS.md`         | Operational rules for future agents             |
-| `planning.md`       | Current phase, next steps, and open questions   |
-| `docs/direction.md` | Stable framing, non-goals, and evaluation gates |
-| `docs/findings.md`  | Research log and fixture findings               |
-| `fixtures/source/`  | Tracked source fixtures                         |
-| `fixtures/work/`    | Generated working copies, ignored by Git        |
-| `fixtures/results/` | Generated first-pass outputs, ignored by Git    |
-| `scripts/`          | Fixture harness and helper scripts              |
-| `test/`             | Node test runner coverage for the harness       |
-| `.oxfmtrc.json`     | Oxfmt formatter config, not markdownlint policy |
-| `package-lock.json` | Pinned local Node/Oxfmt dependency graph        |
+| File or directory       | Purpose                                                            |
+| :---------------------- | :----------------------------------------------------------------- |
+| `README.md`             | Orientation and quick-start notes                                  |
+| `AGENTS.md`             | Operational rules for future agents                                |
+| `planning.md`           | Current phase, next steps, and open questions                      |
+| `docs/direction.md`     | Stable framing, non-goals, and evaluation gates                    |
+| `docs/findings.md`      | Research log and fixture findings                                  |
+| `fixtures/source/`      | Clean source fixtures that must be direct-Oxfmt-checkable          |
+| `fixtures/current/`     | Broader real-world regression fixtures copied from production      |
+| `fixtures/pipe-safety/` | Valid GFM fixtures that require repair/skip behavior before Oxfmt  |
+| `fixtures/violations/`  | Deliberately invalid fixtures that must fail structural validation |
+| `fixtures/work/`        | Generated working copies, ignored by Git                           |
+| `fixtures/results/`     | Generated first-pass outputs, ignored by Git                       |
+| `scripts/`              | Fixture harness and helper scripts                                 |
+| `test/`                 | Node test runner coverage for the harness                          |
+| `.oxfmtrc.json`         | Oxfmt formatter config, not markdownlint policy                    |
+| `package-lock.json`     | Pinned local Node/Oxfmt dependency graph                           |
 
 ## Decision rule
 
@@ -69,7 +72,10 @@ Adopt Oxfmt only if tests show it improves the workflow without weakening these 
 - repeated formatter runs are idempotent
 - formatter behavior is observable without Markdown lint auto-fixes masking the result
 
-All 9 spike fixtures pass the production `markdown-formatter` skill's structural
-guard scripts (`check-structure.js`, `check-tables.js`, `check-fences.js`) across
-both `proseWrap: preserve` and `proseWrap: always` configs. See `docs/findings.md`
-(2026-06-12 entry) for the cross-config results.
+All 9 clean source fixtures pass the production `markdown-formatter` skill's
+structural guard scripts (`check-structure.js`, `check-tables.js`,
+`check-fences.js`) across both `proseWrap: preserve` and `proseWrap: always`
+configs. The expanded local harness also covers copied production-style
+`current/`, `pipe-safety/`, and `violations/` fixtures so Oxfmt-clean cases,
+repair/skip cases, and expected-failure cases stay separate. See
+`docs/findings.md` (2026-06-12 and 2026-06-29 entries) for details.

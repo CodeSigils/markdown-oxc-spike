@@ -488,7 +488,7 @@ Results:
 | :------------------------------------------- | :---------------------------------------------------- |
 | Test suite (9 fixtures)                      | All pass — idempotence and structural guards hold     |
 | Fixture formatting (`fmt:check`)             | All 9 source files correctly formatted — zero changes |
-| Doc formatting (`fmt:check:docs`)            | All 5 doc files correctly formatted                   |
+| Doc formatting (`fmt:check:docs`)            | Documentation files correctly formatted               |
 | Dependency audit                             | 0 vulnerabilities                                     |
 | First-pass output diff (source vs formatted) | **Zero diffs on all 9 fixtures**                      |
 
@@ -603,7 +603,8 @@ spec, consecutive pipes create valid empty cells:
   `validateGfmTableStructure()`, `validateGfmBlock()`. Renamed `detectDoublePipes()`
   to `detectEmptyCells()` with neutral diagnostic messages.
 - `fixtures/source/double-pipe-table.md` — reframed from "phantom" language to
-  neutral valid-GFM empty-cell descriptions.
+  neutral valid-GFM empty-cell descriptions. This fixture was later superseded by
+  `fixtures/pipe-safety/table-empty-cells.md` during the 2026-06-29 taxonomy split.
 - `ACTIVE_PAIN_POINTS.md` — pain point #1 revised from "artifact" framing to
   "intentional vs spurious" framing.
 
@@ -611,3 +612,41 @@ spec, consecutive pipes create valid empty cells:
 test failure). Should structural GFM violations (Example 203 mismatches) cause test
 failures? Currently the structural-change check in `compareTableInfo()` is the
 failing guard for Oxfmt breakage, not the GFM spec rule.
+
+---
+
+## 2026-06-29: Fixture taxonomy hardening and production fixture comparison
+
+Scope:
+
+- Compared the spike fixture layout with `~/projects/agents-markdown-formatter/test/fixtures/`.
+- Split fixture roles so direct-Oxfmt-clean fixtures, valid-but-unsafe pipe fixtures, and deliberate structural violations have separate expectations.
+- Replaced the loose spike-only guard port with production-style table, pipe, empty-cell, and fence-state primitives in `scripts/guard/oxfmt-guard.js`.
+- Reworked `scripts/check-fixture.js` so `--repair`, `--check`, `--dry-run`, `--validate`, and `--fences` are all exercised by tests.
+- Copied production-style fixtures into:
+  - `fixtures/current/` — `hermes-intro.md`, `kitchensink.md`, `sample.mdx`
+  - `fixtures/pipe-safety/` — `table-empty-cells.md`
+  - `fixtures/violations/` — `fence-mismatch.md`, `fence-untitled.md`, `table-adjacent-pipes.md`, `table-column-drift.md`
+- Removed the raw adjacent-pipe fixture from `fixtures/source/` because `fmt:check` intentionally runs raw Oxfmt on that directory.
+
+Results:
+
+- `fixtures/source/` remains the 9-fixture clean Oxfmt reference set.
+- `fixtures/current/` broadens clean regression coverage through the guarded harness, but is not part of raw `fmt:check` because the production sample MDX fixture is structurally useful even when raw Oxfmt would change it.
+- `fixtures/pipe-safety/` captures valid GFM that must be repaired and then kept away from Oxfmt when empty cells remain.
+- `fixtures/violations/` captures expected structural failures and prevents the harness from reporting false confidence.
+- The fence-state regression is covered: `fixtures/source/fence-nested.md --fences` reports 3 real fenced blocks, not body-line-inflated counts.
+
+Commands run:
+
+```bash
+npm test
+npm run fmt:check
+npm run fmt:check:docs
+```
+
+Outcome:
+
+- `npm test` passes 33 tests.
+- `npm run fmt:check` passes on the direct-Oxfmt source fixtures.
+- `npm run fmt:check:docs` passes on docs after formatting.

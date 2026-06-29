@@ -7,14 +7,15 @@ This repo is a Markdown formatter spike. It evaluates Oxfmt behavior on Markdown
 Agents working in this repository MUST:
 
 1. Use the pinned local toolchain from `package-lock.json`.
-2. Run every source fixture through the idempotence harness before reporting fixture work complete.
-3. Run Oxfmt checks on fixtures immediately after editing Markdown files.
-4. Record stable experiment results in `docs/findings.md`.
-5. Keep `planning.md` short; use it for current phase, next steps, and open questions only.
-6. Keep generated outputs out of Git.
-7. Use ripgrep for targeted code/content searches when available; do not read large files wholesale when a targeted search is enough.
-8. Preserve this repo's identity as a published spike/reference repo, not a production formatter package.
-9. Check for stale status, commands, paths, external links, CI behavior, and source-of-truth drift before reporting work complete.
+2. Run clean `fixtures/source/` and `fixtures/current/` cases through the idempotence harness before reporting fixture work complete.
+3. Keep fixture classes separate: clean direct-Oxfmt inputs in `source/` and `current/`, valid-but-unsafe repair cases in `pipe-safety/`, and expected failures in `violations/`.
+4. Run Oxfmt checks on direct-Oxfmt fixtures immediately after editing Markdown files.
+5. Record stable experiment results in `docs/findings.md`.
+6. Keep `planning.md` short; use it for current phase, next steps, and open questions only.
+7. Keep generated outputs out of Git.
+8. Use ripgrep for targeted code/content searches when available; do not read large files wholesale when a targeted search is enough.
+9. Preserve this repo's identity as a published spike/reference repo, not a production formatter package.
+10. Check for stale status, commands, paths, external links, CI behavior, and source-of-truth drift before reporting work complete.
 
 Agents MUST NOT:
 
@@ -41,6 +42,9 @@ Before reporting completion, check at least:
 - `package.json`
 - `.github/workflows/ci.yml`
 - `fixtures/source/**`
+- `fixtures/current/**`
+- `fixtures/pipe-safety/**`
+- `fixtures/violations/**`
 - `scripts/**`
 - `test/**`
 
@@ -82,20 +86,23 @@ npm run audit
 
 ## Project files
 
-| Path                | Purpose                                         |
-| :------------------ | :---------------------------------------------- |
-| `README.md`         | Project overview and quick-start commands       |
-| `AGENTS.md`         | Operational rules for future agents             |
-| `planning.md`       | Current phase, next steps, and open questions   |
-| `docs/direction.md` | Stable project framing and non-goals            |
-| `docs/findings.md`  | Research log and fixture findings               |
-| `fixtures/source/`  | Tracked source fixtures                         |
-| `fixtures/work/`    | Generated working copies, ignored by Git        |
-| `fixtures/results/` | Generated first-pass fixture outputs, ignored   |
-| `scripts/`          | Fixture harness and helper scripts              |
-| `test/`             | Node test runner coverage for the harness       |
-| `.oxfmtrc.json`     | Oxfmt formatter config, not markdownlint policy |
-| `package-lock.json` | Pinned local Node/Oxfmt dependency graph        |
+| Path                    | Purpose                                         |
+| :---------------------- | :---------------------------------------------- |
+| `README.md`             | Project overview and quick-start commands       |
+| `AGENTS.md`             | Operational rules for future agents             |
+| `planning.md`           | Current phase, next steps, and open questions   |
+| `docs/direction.md`     | Stable project framing and non-goals            |
+| `docs/findings.md`      | Research log and fixture findings               |
+| `fixtures/source/`      | Clean direct-Oxfmt source fixtures              |
+| `fixtures/current/`     | Broader real-world regression fixtures          |
+| `fixtures/pipe-safety/` | Valid GFM requiring repair/skip behavior        |
+| `fixtures/violations/`  | Deliberately invalid expected-failure fixtures  |
+| `fixtures/work/`        | Generated working copies, ignored by Git        |
+| `fixtures/results/`     | Generated first-pass fixture outputs, ignored   |
+| `scripts/`              | Fixture harness and helper scripts              |
+| `test/`                 | Node test runner coverage for the harness       |
+| `.oxfmtrc.json`         | Oxfmt formatter config, not markdownlint policy |
+| `package-lock.json`     | Pinned local Node/Oxfmt dependency graph        |
 
 ## External resources
 

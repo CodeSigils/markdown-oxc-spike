@@ -29,12 +29,15 @@ without a supporting source.
 
 ### `~/projects/markdown-oxc-spike` (this spike repo)
 
-| File                   | What it contains                                                                                                                                                                                                          |
-| :--------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/findings.md`     | Full research log: 9 fixture types tested across 3 Oxfmt versions (0.50.0, 0.54.0, 0.56.0), cross-config validation, structural guard verification, Oxc architecture audit, issue #21314 analysis, version drift checks   |
-| `planning.md`          | Current conclusions, open questions (all closed), drift guard checklist, stale-claim audit table                                                                                                                          |
-| `fixtures/source/*.md` | 9 source fixture files covering HTML comments after lists, escaped-pipe tables, semantic-alignment tables, blank fences, nested fences, fence language tags, safe formatting basics, Markdown-in-JS templates, task lists |
-| `README.md`            | Decision rule: adopt Oxfmt only if it does not weaken invariants. All 9 fixtures pass structural guard scripts across both configs                                                                                        |
+| File                    | What it contains                                                                                                                                                                                                                      |
+| :---------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `docs/findings.md`      | Full research log: 9 clean source fixture types tested across 3 Oxfmt versions (0.50.0, 0.54.0, 0.56.0), cross-config validation, structural guard verification, Oxc architecture audit, issue #21314 analysis, version drift checks  |
+| `planning.md`           | Current conclusions, open questions (all closed), drift guard checklist, stale-claim audit table                                                                                                                                      |
+| `fixtures/source/*.md`  | 9 clean direct-Oxfmt fixture files covering HTML comments after lists, escaped-pipe tables, semantic-alignment tables, blank fences, nested fences, fence language tags, safe formatting basics, Markdown-in-JS templates, task lists |
+| `fixtures/current/`     | Broader clean regression fixtures copied from production and exercised through the guarded harness                                                                                                                                    |
+| `fixtures/pipe-safety/` | Valid GFM empty-cell table fixture that exercises repair-and-skip behavior before Oxfmt                                                                                                                                               |
+| `fixtures/violations/`  | Deliberately invalid fixtures that must fail structural validation                                                                                                                                                                    |
+| `README.md`             | Decision rule: adopt Oxfmt only if it does not weaken invariants; fixture taxonomy separates clean, pipe-safety, and expected-failure cases                                                                                           |
 
 ### `~/projects/agents-markdown-formatter` (production formatter repo)
 

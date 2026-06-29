@@ -17,10 +17,12 @@ intentional or introduced by a merge conflict, find-and-replace, or patch tool.
 - Patch tools (sed, patch, find-and-replace) matched to line rather than to cell
 
 **Detection:** markdownlint does not flag `||` — and correctly so, since it's valid
-GFM. Oxfmt pads columns around `||` but does not collapse it. The GFM table
-validation in `check-fixture.js` checks header/delimiter column count match (GFM
-Example 203) and reports data row cell count variances (GFM Example 204), but
-cannot distinguish intentional from spurious empty cells.
+GFM. Oxfmt/Prettier cannot safely format multi-row empty-cell tables in all
+cases; the guarded harness repairs adjacent pipes to `| |` and skips the raw
+Oxfmt pass when empty cells remain. The GFM table validation in
+`check-fixture.js` checks header/delimiter column count match (GFM Example 203)
+and reports data row cell count variances (GFM Example 204), but cannot
+distinguish intentional from spurious empty cells.
 
 **What would help:** No tool can reliably distinguish intentional `||` from
 spurious `||` without human judgment. The safest mitigation is to catch spurious

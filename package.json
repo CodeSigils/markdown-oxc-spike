@@ -6,7 +6,7 @@
   "scripts": {
     "fmt": "oxfmt --write",
     "fmt:check": "oxfmt --check fixtures/source/*.md",
-    "fmt:check:docs": "oxfmt --check README.md AGENTS.md planning.md docs/direction.md docs/findings.md",
+    "fmt:check:docs": "oxfmt --check README.md AGENTS.md planning.md docs/direction.md docs/findings.md ACTIVE_PAIN_POINTS.md EVIDENCE_BASED_PAIN_POINTS.md SYNTHESIS_AND_RECOMMENDATIONS.md",
     "fmt:list": "oxfmt --list-different",
     "audit": "npm audit --audit-level=moderate",
     "check:fixture": "node scripts/check-fixture.js",

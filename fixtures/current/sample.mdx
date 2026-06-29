@@ -1,0 +1,68 @@
+---
+title: MDX Sample Document
+---
+
+import { Button } from './components/Button'
+import { Callout } from './components/Callout'
+
+export const metadata = {
+  author: 'Hermes Team',
+  version: '1.0',
+}
+
+# MDX Sample
+
+This document demonstrates GFM formatting inside an MDX file.
+
+## Features
+
+| Feature     | Status | Notes                     |
+| :---------- | :----- | :------------------------ |
+| Tables      | ✅     | GFM table formatting      |
+| Task lists  | ✅     | - [x] Done, - [ ] Pending |
+| Code blocks | ✅     | Language tags preserved   |
+| Blockquotes | ✅     | > quoted content          |
+
+- [x] Initialize project
+- [x] Configure formatter
+- [ ] Write documentation
+
+> MDX files are formatted as Markdown with JSX support. The structural guard validates GFM elements only.
+
+## Code Examples
+
+```javascript
+// This code block is preserved (embeddedLanguageFormatting: off)
+const greeting = 'hello';
+function sayHello() {
+  return greeting;
+}
+```
+
+```typescript
+export interface User {
+  id: number;
+  name: string;
+}
+```
+
+## JSX Components
+
+<Callout type="info">
+  This Callout component is JSX and is not validated by the formatter.
+</Callout>
+
+<Button variant="primary">Click me</Button>
+
+## Nested Lists
+
+1. First item
+   - Sub-item A
+   - Sub-item B
+2. Second item
+   - Sub-item C
+3. Third item
+
+## Strikethrough
+
+~~This text is deprecated.~~ This text is current.
