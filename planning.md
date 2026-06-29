@@ -108,14 +108,15 @@ For formatter-safety coverage copied from production:
 | `fixtures/source/safe-formatting-basics.md`   | pass   | Oxfmt left trailing spaces, heading spacing, list spacing untouched              |
 | `fixtures/source/markdown-in-js-template.md`  | pass   | Oxfmt preserved structure and formatted code inside JavaScript template literals |
 | `fixtures/source/task-lists.md`               | pass   | Oxfmt preserved task list checkboxes and formatting; idempotent                  |
+| `fixtures/current/table-gfm-spec.md`          | pass   | Guard accepts representative GFM table forms and escaped inline-code pipes       |
 
 ## Expanded formatter-safety coverage
 
 | Fixture class           | Files | Expected behavior                                                        |
 | :---------------------- | :---- | :----------------------------------------------------------------------- |
-| `fixtures/current/`     | 3     | Clean broad regression fixtures; guarded idempotence and validation pass |
+| `fixtures/current/`     | 4     | Clean broad regression fixtures; guarded idempotence and validation pass |
 | `fixtures/pipe-safety/` | 1     | Valid GFM adjacent-pipe table repairs, then skips unsafe Oxfmt pass      |
-| `fixtures/violations/`  | 4     | Deliberately invalid fixtures fail structural validation                 |
+| `fixtures/violations/`  | 5     | Deliberately invalid fixtures fail structural validation                 |
 
 ## Completed next steps
 

@@ -464,19 +464,19 @@ must be chosen on each — picking "D" or "F" only answers the first.
 
 Shows what each option actually addresses. Most gaps are in **Detection**, not Engine.
 
-| #   | Pain point                                | Sev  | Option D (current)           | Option F (custom rules)       | Option E (friction fixes) | Real coverage gap       |
-| :-- | :---------------------------------------- | :--: | :--------------------------- | :---------------------------- | :------------------------ | :---------------------- |
-| 1   | Adjacent pipes (`&#124;&#124;`) in tables | Mod  | None                         | None                          | None                      | **New rule needed**     |
-| 2   | Empty fences                              | Low  | None                         | None                          | None                      | **New rule needed**     |
-| 3   | Inline-code pipes as columns              | Mod  | Post-hoc (`check-tables.js`) | Same post-hoc                 | Pre-format scan           | **Pre-format check**    |
-| 4   | Tilde→backtick normalization              | Low  | None                         | Partial (preserve-style rule) | Diff category             | Small                   |
-| 5   | Code-content formatting                   | Mod  | Config fix (`"off"`)         | N/A                           | `--doctor` check          | **Discoverability**     |
-| 6   | Prose reflow on list continuations        | Low  | None                         | None                          | Partial (diff guard)      | **New guard**           |
-| 7   | HTML comment after list item              | Hist | Regression fixture           | N/A                           | N/A                       | —                       |
-| 8   | Table column count mismatch               | Low  | Silent padding               | Rule could warn               | Pre-format warn           | **Warn vs. silent fix** |
-| 9   | Unclosed/mismatched fences                | High | `check-fences.js`            | N/A                           | N/A                       | —                       |
-| 10  | Inline code with internal backticks       | Low  | None                         | None                          | None                      | **New rule needed**     |
-| 11  | Backtick count escalation (nested)        | Low  | None                         | Partial (report count)        | Diff category             | Small                   |
+| #   | Pain point                                | Sev  | Option D (current)            | Option F (custom rules)       | Option E (friction fixes) | Real coverage gap       |
+| :-- | :---------------------------------------- | :--: | :---------------------------- | :---------------------------- | :------------------------ | :---------------------- |
+| 1   | Adjacent pipes (`&#124;&#124;`) in tables | Mod  | None                          | None                          | None                      | **New rule needed**     |
+| 2   | Empty fences                              | Low  | None                          | None                          | None                      | **New rule needed**     |
+| 3   | Inline-code pipes as columns              | Mod  | Preflight (`check-tables.js`) | Same preflight                | Done                      | —                       |
+| 4   | Tilde→backtick normalization              | Low  | None                          | Partial (preserve-style rule) | Diff category             | Small                   |
+| 5   | Code-content formatting                   | Mod  | Config fix (`"off"`)          | N/A                           | `--doctor` check          | **Discoverability**     |
+| 6   | Prose reflow on list continuations        | Low  | None                          | None                          | Partial (diff guard)      | **New guard**           |
+| 7   | HTML comment after list item              | Hist | Regression fixture            | N/A                           | N/A                       | —                       |
+| 8   | Table column count mismatch               | Low  | Silent padding                | Rule could warn               | Pre-format warn           | **Warn vs. silent fix** |
+| 9   | Unclosed/mismatched fences                | High | `check-fences.js`             | N/A                           | N/A                       | —                       |
+| 10  | Inline code with internal backticks       | Low  | None                          | None                          | None                      | **New rule needed**     |
+| 11  | Backtick count escalation (nested)        | Low  | None                          | Partial (report count)        | Diff category             | Small                   |
 
 Seven of eleven pain points are detection gaps, not engine gaps. Neither Option D, E,
 nor F covers most of them today.
@@ -485,8 +485,9 @@ nor F covers most of them today.
 
 Evidence from git history across 3 repos shows that **pain point #1 (double pipes)
 recurred 3 times in a 5-day window in the same repository** — actual damage, not
-hypothetical risk. The remaining gaps (empty fences, inline-code pipes, backtick
-issues) have zero recorded incidents. This shifts the priority:
+hypothetical risk. The remaining gaps (empty fences, backtick issues) have zero
+recorded incidents. Inline-code pipes are now covered by pre-format validation. This
+shifts the priority:
 
 1. **Keep the current engine (Option D).** The oxfmt binary dependency has not caused
    real pain in practice. Building Option F (custom markdownlint rules) swaps one
@@ -500,9 +501,9 @@ issues) have zero recorded incidents. This shifts the priority:
    doom-emacs-config affected 7 rows. A pre-format structural warning would catch
    this before it reaches a formatter. Lower effort than the double-pipe check.
 4. **No action on the remaining gaps until evidence surfaces.** Pain points #2
-   (empty fences), #3 (inline-code pipes), #10 (backtick in inline code), and #11
-   (backtick escalation) have zero recorded incidents across all three repos.
-   Proactive work on these would be speculative.
+   (empty fences), #10 (backtick in inline code), and #11 (backtick escalation)
+   have zero recorded incidents across all three repos. Proactive work on these
+   would be speculative.
 5. **Do not launch a big Option E audit yet.** Wait for a specific friction incident
    (install failure, PATH confusion, invocation friction reported by a real user).
 

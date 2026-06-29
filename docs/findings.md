@@ -650,3 +650,22 @@ Outcome:
 - `npm test` passes 33 tests.
 - `npm run fmt:check` passes on the direct-Oxfmt source fixtures.
 - `npm run fmt:check:docs` passes on docs after formatting.
+
+## 2026-06-29: Inline-code pipes require pre-format blocking
+
+Source artifacts:
+
+- `fixtures/violations/table-inline-code-pipe.md`
+- `fixtures/current/table-gfm-spec.md`
+- `scripts/guard/oxfmt-guard.js`
+
+Observed:
+
+- Oxfmt/Prettier treats an unescaped pipe inside an inline code span in a table row, such as `` `cat access.log | grep 500` ``, as a table delimiter.
+- That changes table structure before a post-format structural comparison can reliably recover author intent.
+- Escaping the pipe inside inline code (`` `cat access.log \| grep 500` ``) remains accepted.
+
+Decision:
+
+- The spike guard mirrors production and reports unescaped inline-code pipes in table rows before invoking Oxfmt.
+- The pattern is tracked as an expected violation, not as a clean source fixture.

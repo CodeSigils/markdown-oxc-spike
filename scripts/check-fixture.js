@@ -121,6 +121,11 @@ function validateFences(content) {
 
 async function applyGuardedFormatting(filePath) {
   const original = await readFile(filePath, "utf8");
+  const formatterUnsafeTableErrors = validateTables(original).filter((error) => error.includes("inline code span contains unescaped pipe"));
+  if (formatterUnsafeTableErrors.length > 0) {
+    throw new Error(`inline-code table pipe would corrupt oxfmt output:\n${formatterUnsafeTableErrors.join("\n")}`);
+  }
+
   const pipeIssues = detectAdjacentPipes(original);
   const afterPipeRepair = repairAdjacentPipes(original);
   const afterSpacing = normalizeTableSpacing(afterPipeRepair);
@@ -207,6 +212,13 @@ async function runCheck(fixturePath) {
 
   if (hasTableWithEmptyCells(source)) {
     console.error(`  ✗ ${basename(fixturePath)} — table with empty cells detected; oxfmt cannot safely format it`);
+    return false;
+  }
+
+  const formatterUnsafeTableErrors = validateTables(source).filter((error) => error.includes("inline code span contains unescaped pipe"));
+  if (formatterUnsafeTableErrors.length > 0) {
+    console.error(`  ✗ ${basename(fixturePath)} — inline-code table pipe would corrupt oxfmt output:`);
+    for (const error of formatterUnsafeTableErrors) console.error(`    ${error}`);
     return false;
   }
 

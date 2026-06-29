@@ -62,7 +62,52 @@ export function splitTableCells(line) {
 }
 
 export function isPotentialTableRow(line) {
-  return splitTableCells(line).length > 1;
+  const trimmed = line.trim();
+  const pipeCount = (trimmed.match(/\|/g) || []).length;
+  return splitTableCells(line).length > 1 || (trimmed.startsWith("|") && trimmed.endsWith("|") && pipeCount >= 2);
+}
+
+export function tableRowHasInlineCodePipe(line) {
+  let escaped = false;
+  let codeSpanTicks = 0;
+  let codeSpanHasPipe = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+
+    if (ch === "\\") {
+      escaped = true;
+      continue;
+    }
+
+    if (ch === "`") {
+      let ticks = 1;
+      while (i + 1 < line.length && line[i + 1] === "`") {
+        ticks++;
+        i++;
+      }
+      if (codeSpanTicks === ticks) {
+        if (codeSpanHasPipe) return true;
+        codeSpanTicks = 0;
+        codeSpanHasPipe = false;
+      } else if (codeSpanTicks === 0) {
+        codeSpanTicks = ticks;
+        codeSpanHasPipe = false;
+      }
+      continue;
+    }
+
+    if (ch === "|" && codeSpanTicks > 0) {
+      codeSpanHasPipe = true;
+    }
+  }
+
+  return false;
 }
 
 export function isDelimiterLine(line) {
@@ -302,6 +347,10 @@ export function validateTables(content) {
     const headerCols = splitTableCells(header).length;
     const delimiterCols = splitTableCells(delimiter).length;
 
+    if (tableRowHasInlineCodePipe(header)) {
+      errors.push(`Line ${i + 1}: inline code span contains unescaped pipe; oxfmt would split it as a table column`);
+    }
+
     if (delimiterCols !== headerCols) {
       errors.push(`Line ${i + 2}: delimiter has ${delimiterCols} cols but header has ${headerCols}`);
     }
@@ -310,6 +359,9 @@ export function validateTables(content) {
     for (let j = i + 2; j < lines.length && isPotentialTableRow(lines[j]); j++) {
       if (isDelimiterLine(lines[j])) break;
       const dataCols = splitTableCells(lines[j]).length;
+      if (tableRowHasInlineCodePipe(lines[j])) {
+        errors.push(`Line ${j + 1}: inline code span contains unescaped pipe; oxfmt would split it as a table column`);
+      }
       if (dataCols !== headerCols) {
         errors.push(`Line ${j + 1}: row ${rowIndex} has ${dataCols} cols but header has ${headerCols}`);
       }

@@ -64,12 +64,9 @@ column delimiter. This is a known Prettier/GFM spec violation.
 - Documenting pipe-separated values inside inline code
 - Any table cell with a pipe character that the author thought was safe inside `` ` `
 
-**Detection:** `check-tables.js` catches the resulting column count change, but only
-after formatting has already altered the structure. The `--guard` flag rolls back the
-change, but the detection is post-hoc — the file was modified and then restored.
+**Detection:** `check-tables.js` catches unescaped pipes inside inline code spans before invoking Oxfmt, so the formatter refuses the file rather than letting Prettier split the code span as a table delimiter. The spike guard mirrors this preflight, and `table-inline-code-pipe.md` records the failure mode as an expected violation.
 
-**What would help:** A pre-format check that scans table rows for inline-code spans
-containing unescaped pipes and warns before Oxfmt runs.
+**What would help:** Already covered by the formatter preflight. The remaining gap is author intent: the diagnostic can say the shape is unsafe for Oxfmt, but the author still has to decide whether to escape the pipe (`\|`) or move the pipeline example out of the table.
 
 ---
 
@@ -242,16 +239,16 @@ changes separately from other formatting changes, similar to what
 
 ## Summary
 
-| #   | Problem                              | Severity   | Tool coverage                | Gap                                      |
-| --- | ------------------------------------ | ---------- | ---------------------------- | ---------------------------------------- | ---- | --------------------------------------------------------- |
-| 1   | Double `                             |            | ` in tables                  | Moderate                                 | None | No lint rule or normalization for adjacent-pipe artifacts |
-| 2   | Empty fences                         | Low        | None                         | No lint rule for zero-content fences     |
-| 3   | Inline-code pipes in tables          | Moderate   | Post-hoc (`check-tables.js`) | Pre-format scan missing                  |
-| 4   | Tilde→backtick normalization         | Low        | None                         | No preserve-author-intent option         |
-| 5   | Code-content formatting              | Moderate   | Config-driven (`"off"`)      | Discoverability gap, easy to miss        |
-| 6   | Prose reflow on list continuations   | Low        | None                         | No structural-diff guard                 |
-| 7   | HTML comment after list item         | Historical | Regression fixture           | Fixed, guarded                           |
-| 8   | Table column count mismatch          | Low        | `repairTableColumns`         | Silent padding, no warning               |
-| 9   | Unclosed/mismatched fences           | High       | `check-fences.js`            | Covered                                  |
-| 10  | Inline code with internal backticks  | Low        | None                         | No inline-code span lint rule            |
-| 11  | Backtick escalation in nested fences | Low        | None                         | No diff category for fence-count changes |
+| #   | Problem                              | Severity   | Tool coverage                 | Gap                                                       |
+| --- | ------------------------------------ | ---------- | ----------------------------- | --------------------------------------------------------- |
+| 1   | Double `\|\|` in tables              | Moderate   | None                          | No lint rule or normalization for adjacent-pipe artifacts |
+| 2   | Empty fences                         | Low        | None                          | No lint rule for zero-content fences                      |
+| 3   | Inline-code pipes in tables          | Moderate   | Preflight (`check-tables.js`) | Covered                                                   |
+| 4   | Tilde→backtick normalization         | Low        | None                          | No preserve-author-intent option                          |
+| 5   | Code-content formatting              | Moderate   | Config-driven (`"off"`)       | Discoverability gap, easy to miss                         |
+| 6   | Prose reflow on list continuations   | Low        | None                          | No structural-diff guard                                  |
+| 7   | HTML comment after list item         | Historical | Regression fixture            | Fixed, guarded                                            |
+| 8   | Table column count mismatch          | Low        | `repairTableColumns`          | Silent padding, no warning                                |
+| 9   | Unclosed/mismatched fences           | High       | `check-fences.js`             | Covered                                                   |
+| 10  | Inline code with internal backticks  | Low        | None                          | No inline-code span lint rule                             |
+| 11  | Backtick escalation in nested fences | Low        | None                          | No diff category for fence-count changes                  |
