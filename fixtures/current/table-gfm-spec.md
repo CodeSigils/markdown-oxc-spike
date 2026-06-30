@@ -1,6 +1,6 @@
 # GFM Table Spec Coverage
 
-Representative GFM table forms that the spike guard should accept.
+Representative GFM table forms that the formatter-safety checks must accept.
 
 ## Leading and Trailing Pipes
 

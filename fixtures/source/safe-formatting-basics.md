@@ -15,8 +15,7 @@ Content after heading with blank line.
 Paragraph before list.
 
 - Item one
-- Item two
-  Paragraph after list without blank line.
+- Item two Paragraph after list without blank line.
 
 ## List With Blank Lines
 
