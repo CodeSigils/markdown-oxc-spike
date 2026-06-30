@@ -2,11 +2,11 @@
 
 ## Purpose
 
-This repo evaluates whether Oxfmt can help with agent-authored Markdown formatting without weakening the current Markdown lint skill's safety guarantees.
+This repo evaluated whether Oxfmt can help with agent-authored Markdown formatting without weakening the current Markdown lint skill's safety guarantees.
 
-The working direction is a lighter Markdown formatter or guarded formatter wrapper, not a new Markdown linter.
+**Result: No — Oxfmt is the wrong shape.** See `planning.md` (Open questions section, 2026-06-25 entry) for the detailed verdict. The delta it provides over existing tooling is narrow enough that a purpose-built micro-formatter would be simpler, safer, and never surprise the user. This repo is retained as evidence, fixtures, and decision context for future Oxfmt version-bump testing.
 
-## Framing
+## Reference framing
 
 ### This is not an Oxc Markdown linter
 
@@ -18,7 +18,7 @@ Oxfmt is the relevant tool because it formats Markdown and MDX. Treat it as a fo
 
 The Oxc project maintains conformance fixtures (e.g., `apps/oxfmt/conformance/fixtures/edge-cases/md-in-js/`) that verify Oxfmt's correctness when formatting Markdown embedded in JavaScript, TypeScript, and other host languages. Those fixtures answer: "Does Oxfmt produce valid output for MDX-like syntax?"
 
-This repo asks a different question: "Assuming Oxfmt works correctly, can we integrate it into a Markdown linting workflow without weakening safety guarantees?" Our fixtures test structural preservation (fence style, table structure, idempotence) to determine what guardrails would be needed for safe use as a formatting supplement.
+This repo asked a different question: "Assuming Oxfmt works correctly, can we integrate it into a Markdown linting workflow without weakening safety guarantees?" The answer is no — the dependency cost outweighs the narrow formatting delta.
 
 ### Formatter and linter responsibilities stay separate
 
@@ -39,18 +39,17 @@ A linter or safety validator must still handle policy and structure:
 - generated-content boundaries
 - failure modes that should block autonomous fixes
 
-## Current recommended architecture
+## Evaluation results
 
-Based on testing, the validated architecture is:
+| Gate                                              | Result                                                                                                       |
+| :------------------------------------------------ | :----------------------------------------------------------------------------------------------------------- |
+| Idempotent on representative Markdown fixtures    | Pass — all 9 source fixtures idempotent across 3 Oxfmt versions                                              |
+| Preserves table structure                         | Pass with guard — Oxfmt preserves well-formed tables; inline-code pipes require pre-format blocking          |
+| Preserves fenced-code-block structure             | Pass with guard — tilde-to-backtick normalization is idempotent but changes style; guard detects drift       |
+| Understandable, configurable behavior             | Partial — 12 Prettier config options, only 4 relevant to Markdown; behavior can change across minor versions |
+| Improves speed or simplicity for a clear use case | Fail — delta over existing tooling too narrow; dependency cost disproportionate                              |
 
-```text
-markdownlint-cli2        -> policy rules
-custom fence validator   -> blocking safety
-custom table validator   -> blocking safety
-guarded Oxfmt wrapper    -> formatting supplement with idempotence and structure checks
-```
-
-If Oxfmt does not prove useful, keep the current Markdown lint skill unchanged and retain this repo as evidence.
+Verdict: Oxfmt fills a small gap at a disproportionate cost. Keep it as reference evidence; do not adopt as a formatting supplement.
 
 ## Non-goals
 
@@ -59,15 +58,3 @@ If Oxfmt does not prove useful, keep the current Markdown lint skill unchanged a
 - Do not add an active `.markdownlint.json`; Oxfmt does not read it.
 - Do not install Oxlint unless this repo grows non-trivial JavaScript or TypeScript tooling.
 - Do not trust formatter output unless repeated runs converge.
-
-## Evaluation gates
-
-Oxfmt is only useful for this project if tests show that it:
-
-- is idempotent on representative Markdown fixtures
-- preserves table structure or lets a wrapper detect structural changes
-- preserves fenced-code-block structure or lets a wrapper detect structural changes
-- has understandable, configurable behavior for agents
-- improves speed or simplicity for a clear use case
-
-Failure in any safety area means Oxfmt remains research-only or optional behind guardrails.
