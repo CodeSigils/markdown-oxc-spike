@@ -71,11 +71,11 @@ npm run audit
 
 - **9 source fixtures** — clean Oxfmt reference set covering fences, tables, task lists,
   markdown-in-JS templates, and safe formatting.
-- **4 current/ fixtures** — real-world regression fixtures copied from production.
+- **3 current/ fixtures** — real-world regression fixtures copied from production.
 - **1 pipe-safety/ fixture** — valid GFM that requires repair/skip before Oxfmt.
-- **7 violations/ fixtures** — deliberate structural failures that the guard must detect
-  (fence mismatch, fence untitled, adjacent pipes, column-count mismatch, column drift,
-  inline-code pipes, no-leading-pipe mismatch).
+- **8 violations/ fixtures** — deliberate structural failures that the guard must detect
+  (fence mismatch, fence untitled, delimiter-row adjacent pipes, adjacent pipes,
+  column-count mismatch, column drift, inline-code pipes, no-leading-pipe mismatch).
 
 All source fixtures pass the production `markdown-formatter` skill's structural guard
 scripts (`check-structure.js`, `check-tables.js`, `check-fences.js`) across both

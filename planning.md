@@ -114,9 +114,9 @@ For formatter-safety coverage copied from production:
 
 | Fixture class           | Files | Expected behavior                                                        |
 | :---------------------- | :---- | :----------------------------------------------------------------------- |
-| `fixtures/current/`     | 4     | Clean broad regression fixtures; guarded idempotence and validation pass |
+| `fixtures/current/`     | 3     | Clean broad regression fixtures; guarded idempotence and validation pass |
 | `fixtures/pipe-safety/` | 1     | Valid GFM adjacent-pipe table repairs, then skips unsafe Oxfmt pass      |
-| `fixtures/violations/`  | 5     | Deliberately invalid fixtures fail structural validation                 |
+| `fixtures/violations/`  | 8     | Deliberately invalid fixtures fail structural validation                 |
 
 ## Completed next steps
 
