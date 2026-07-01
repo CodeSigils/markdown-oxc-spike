@@ -624,7 +624,7 @@ Scope:
 - Replaced the loose spike-only guard port with production-style table, pipe, empty-cell, and fence-state primitives in `scripts/guard/oxfmt-guard.js`.
 - Reworked `scripts/check-fixture.js` so `--repair`, `--check`, `--dry-run`, `--validate`, and `--fences` are all exercised by tests.
 - Copied production-style fixtures into:
-  - `fixtures/current/` — `hermes-intro.md`, `kitchensink.md`, `sample.mdx`
+  - `fixtures/current/` — `kitchensink.md`, `sample.mdx`
   - `fixtures/pipe-safety/` — `table-empty-cells.md`
   - `fixtures/violations/` — `fence-mismatch.md`, `fence-untitled.md`, `table-adjacent-pipes.md`, `table-column-drift.md`
 - Removed the raw adjacent-pipe fixture from `fixtures/source/` because `fmt:check` intentionally runs raw Oxfmt on that directory.
